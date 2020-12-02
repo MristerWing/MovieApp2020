@@ -1,36 +1,62 @@
-function Food({ name, img }) {
-	return (
-		<div>
-			<h2>Hello {name}</h2>
-			<img alt={name} src={img}></img>
-		</div>
-	);
-}
+import Axios from 'axios';
+import React, { Component } from 'react';
+import Movies from './Movies';
 
-function App() {
-	const list = [
-		{
-			name: 'kimchi',
-			img: `https://cdn.imweb.me/thumbnail/20200415/6b6e035658bac.png`,
-		},
-		{
-			name: 'ramen',
-			img: `https://w.namu.la/s/9f15f198aab1b14c8aa47e96a91a9d03331ecb7b5b892c803159d39b0d77ab4be30e2f15f66191284d7dad8371989329cc1c80810745e980a6949ae5e3589df6a13ccfacca097aba5f1c7f81a696bc901822ee3827310c9825c68b6f74872fa1`,
-		},
-		{
-			name: 'steak',
-			img: `https://img.huffingtonpost.com/asset/5bf24ac824000060045835ff.jpeg?ops=1778_1000`,
-		},
-	];
+class App extends Component {
+	state = {
+		isLoding: true,
+		movies: [],
+	};
 
-	return (
-		<div>
-			<h1>Hello</h1>
-			{list.map(({ name, img }, key) => (
-				<Food key={key} name={name} img={img}></Food>
-			))}
-		</div>
-	);
+	getMovie = async () => {
+		const {
+			data: {
+				data: { movies },
+			},
+		} = await Axios.get(
+			'https://yts-proxy.now.sh/list_movies.json?sort_by=rating'
+		);
+
+		console.log(movies);
+		this.setState(() => ({ movies, isLoding: false }));
+	};
+
+	componentDidMount() {
+		this.getMovie();
+	}
+
+	render() {
+		const { isLoding, movies } = this.state;
+		return (
+			<div>
+				<h1>
+					{isLoding
+						? 'Loding...'
+						: movies.map(
+								(
+									{
+										id,
+										year,
+										title,
+										summary,
+										medium_cover_image,
+									},
+									key
+								) => (
+									<Movies
+										key={key}
+										id={id}
+										year={year}
+										title={title}
+										summary={summary}
+										poster={medium_cover_image}
+									></Movies>
+								)
+						  )}
+				</h1>
+			</div>
+		);
+	}
 }
 
 export default App;
